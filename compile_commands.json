@@ -1,0 +1,107 @@
+[
+  {
+    "arguments": [
+      "/home/pedro/.local/bin/arm-none-eabi/bin/arm-none-eabi-gcc",
+      "-c",
+      "-Iinclude",
+      "-mcpu=cortex-m4",
+      "-mthumb",
+      "-o",
+      "bin/blink.elf",
+      "src/main.c"
+    ],
+    "directory": "/home/pedro/Dev/kerbal-controller",
+    "file": "/home/pedro/Dev/kerbal-controller/src/main.c",
+    "output": "/home/pedro/Dev/kerbal-controller/bin/blink.elf"
+  },
+  {
+    "arguments": [
+      "/home/pedro/.local/bin/arm-none-eabi/bin/arm-none-eabi-gcc",
+      "-c",
+      "-Iinclude",
+      "-mcpu=cortex-m4",
+      "-mthumb",
+      "-o",
+      "bin/blink.elf",
+      "src/syscalls.c"
+    ],
+    "directory": "/home/pedro/Dev/kerbal-controller",
+    "file": "/home/pedro/Dev/kerbal-controller/src/syscalls.c",
+    "output": "/home/pedro/Dev/kerbal-controller/bin/blink.elf"
+  },
+  {
+    "arguments": [
+      "/home/pedro/.local/bin/arm-none-eabi/bin/arm-none-eabi-gcc",
+      "-c",
+      "-Iinclude",
+      "-mcpu=cortex-m4",
+      "-mthumb",
+      "-o",
+      "bin/blink.elf",
+      "src/sysmem.c"
+    ],
+    "directory": "/home/pedro/Dev/kerbal-controller",
+    "file": "/home/pedro/Dev/kerbal-controller/src/sysmem.c",
+    "output": "/home/pedro/Dev/kerbal-controller/bin/blink.elf"
+  },
+  {
+    "arguments": [
+      "/home/pedro/.local/bin/arm-none-eabi/bin/arm-none-eabi-gcc",
+      "-c",
+      "-Iinclude",
+      "-mcpu=cortex-m4",
+      "-mthumb",
+      "-o",
+      "bin/blink.elf",
+      "src/uart.c"
+    ],
+    "directory": "/home/pedro/Dev/kerbal-controller",
+    "file": "/home/pedro/Dev/kerbal-controller/src/uart.c",
+    "output": "/home/pedro/Dev/kerbal-controller/bin/blink.elf"
+  },
+  {
+    "arguments": [
+      "/home/pedro/.local/bin/arm-none-eabi/bin/arm-none-eabi-gcc",
+      "-c",
+      "-Iinclude",
+      "-mcpu=cortex-m4",
+      "-mthumb",
+      "-o",
+      "bin/blink.elf",
+      "src/simpit.c"
+    ],
+    "directory": "/home/pedro/Dev/kerbal-controller",
+    "file": "/home/pedro/Dev/kerbal-controller/src/simpit.c",
+    "output": "/home/pedro/Dev/kerbal-controller/bin/blink.elf"
+  },
+  {
+    "arguments": [
+      "/home/pedro/.local/bin/arm-none-eabi/bin/arm-none-eabi-gcc",
+      "-c",
+      "-Iinclude",
+      "-mcpu=cortex-m4",
+      "-mthumb",
+      "-o",
+      "bin/blink.elf",
+      "src/ringbuffer.c"
+    ],
+    "directory": "/home/pedro/Dev/kerbal-controller",
+    "file": "/home/pedro/Dev/kerbal-controller/src/ringbuffer.c",
+    "output": "/home/pedro/Dev/kerbal-controller/bin/blink.elf"
+  },
+  {
+    "arguments": [
+      "/home/pedro/.local/bin/arm-none-eabi/bin/arm-none-eabi-gcc",
+      "-c",
+      "-Iinclude",
+      "-mcpu=cortex-m4",
+      "-mthumb",
+      "-o",
+      "bin/blink.elf",
+      "startup_stm32l433rctxp.s"
+    ],
+    "directory": "/home/pedro/Dev/kerbal-controller",
+    "file": "/home/pedro/Dev/kerbal-controller/startup_stm32l433rctxp.s",
+    "output": "/home/pedro/Dev/kerbal-controller/bin/blink.elf"
+  }
+]
