@@ -26,6 +26,6 @@ void led_init() {
 
 void led_on() { GPIOB->BSRR |= GPIO_BSRR_BS_13; }
 
-void led_off() { GPIOB->BSRR |= GPIO_BSRR_BR13; }
+void led_off() { GPIOB->BSRR |= GPIO_BSRR_BR_13; }
 
 void led_toggle() { GPIOB->ODR ^= GPIO_ODR_OD13; }
