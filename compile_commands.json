@@ -98,6 +98,21 @@
       "-mthumb",
       "-o",
       "bin/blink.elf",
+      "src/timers.c"
+    ],
+    "directory": "/home/pedro/Dev/kerbal-controller",
+    "file": "/home/pedro/Dev/kerbal-controller/src/timers.c",
+    "output": "/home/pedro/Dev/kerbal-controller/bin/blink.elf"
+  },
+  {
+    "arguments": [
+      "/home/pedro/.local/bin/arm-none-eabi/bin/arm-none-eabi-gcc",
+      "-c",
+      "-Iinclude",
+      "-mcpu=cortex-m4",
+      "-mthumb",
+      "-o",
+      "bin/blink.elf",
       "startup_stm32l433rctxp.s"
     ],
     "directory": "/home/pedro/Dev/kerbal-controller",

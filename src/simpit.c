@@ -1,12 +1,15 @@
 #include "simpit.h"
 #include "simpit_message_types.h"
 #include "stm32l433xx.h"
+#include "timers.h"
 #include "uart.h"
 #include <stdint.h>
 
 const char KERBALSIMPIT_VERSION[] =
     "2.4.0"; /**< Library version sent to the plugin for compatibility checking.
               */
+
+static int received_index = 0;
 
 // Taken directly from
 // https://github.com/Simpit-team/KerbalSimpitRevamped-Arduino/blob/main/src/KerbalSimpit.cpp
@@ -51,7 +54,7 @@ int cobsDecode(const uint8_t *buffer, int length, void *data) {
   return (int)(decode - (uint8_t *)data);
 }
 
-void simpit_send(uint8_t type, uint8_t *msg, int len) {
+void simpit_send(uint8_t type, char *msg, int len) {
   uint8_t buffer[MAX_PAYLOAD_SIZE + 2];
 
   buffer[0] = type;
@@ -96,15 +99,13 @@ int simpit_init() {
     payload[i + 1] = KERBALSIMPIT_VERSION[i];
   }
   i += 1;
-  simpit_send(0x00, payload, i); // Send SYN
+  simpit_send(0x00, (char *)payload, i); // Send SYN
 
   // Wait for response
   int count = 0;
   while (!uart_read_available()) {
     count += 1;
-    // TODO: Implement delay properly
-    for (int i = 0; i < 10000; i++) {
-    }
+    delay_ms(100);
     if (count > 100)
       return 0;
   }
@@ -125,7 +126,7 @@ int simpit_init() {
       // Test if the message received is a SYNACK
       if (decoded_buffer[0] == SYNC_MESSAGE && decoded_buffer[1] == 0x01) {
         payload[0] = 0x02;
-        simpit_send(0x00, payload, i); // Send ACK
+        simpit_send(0x00, (char *)payload, i); // Send ACK
         return 1;
       } else {
         return 0;
@@ -137,4 +138,49 @@ int simpit_init() {
   }
 
   return 0;
+}
+
+void simpit_print(char *str, uint8_t options) {
+  int max_length = sizeof(str);
+  uint8_t payload[32];
+  payload[0] = options;
+
+  for (uint8_t i = 0; i < 31; i++) {
+    if (str[i] == '\0') {
+      payload[i + 1] = '\0';
+      break;
+    }
+
+    payload[i + 1] = str[i];
+  }
+
+  simpit_send(CUSTOM_LOG, (char *)payload, 32);
+}
+
+void simpit_update() {
+  uint8_t buffer[MAX_PAYLOAD_SIZE + 4];
+  uint8_t decoded_buffer[MAX_PAYLOAD_SIZE + 4];
+
+  while (uart_read_available()) {
+    buffer[received_index] = uart_read();
+    received_index++;
+
+    if (!buffer[received_index - 1]) {
+      uint8_t decoded_size = cobsDecode(buffer, received_index, decoded_buffer);
+
+      // Account for the overhead of 1 byte of COBS
+      if (decoded_size == received_index - 1) {
+        uint8_t checksum = 0;
+        for (uint8_t i = 0; i < decoded_size - 2; i++) {
+          checksum ^= decoded_buffer[i];
+        }
+
+        if (checksum == decoded_buffer[decoded_size - 2]) {
+          message_handler(decoded_buffer[0], decoded_buffer + 1,
+                          decoded_size - 3);
+        }
+      }
+      received_index = 0;
+    }
+  }
 }
