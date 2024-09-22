@@ -10,5 +10,6 @@ int simpit_init();
 void simpit_send(uint8_t type, char *msg, int len);
 void simpit_update();
 void message_handler(uint8_t type, uint8_t *msg, uint8_t length);
+void activate_action(uint8_t action);
 
 #endif

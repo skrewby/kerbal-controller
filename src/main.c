@@ -9,7 +9,6 @@
 
 uint32_t SystemCoreClock = 16000000;
 uint32_t BaudRate = 115200;
-int state = 0;
 
 #define LED_PIN (0x1 << 13)
 
@@ -32,24 +31,31 @@ void setup_led() {
   GPIOB->MODER |= (0x1 << GPIO_MODER_MODE13_Pos);
 }
 
+void setup_button() {
+  // Enable GPIOC clock
+  RCC->AHB2ENR |= RCC_AHB2ENR_GPIOCEN;
+
+  // Configure PC13 as input
+  GPIOC->MODER &= ~GPIO_MODER_MODE13_Msk;
+  GPIOC->MODER |= (0x00 << GPIO_MODER_MODE13_Pos);
+
+  // Disable PC13 Pull-up/Pull-down
+  GPIOC->PUPDR &= ~GPIO_PUPDR_PUPD13_Msk;
+}
+
+int button_pressed() { return (GPIOC->IDR & GPIO_IDR_ID13) == GPIO_IDR_ID13; }
+
 void led_on() { GPIOB->ODR |= LED_PIN; }
 
 void led_off() { GPIOB->ODR &= ~LED_PIN; }
 
-void message_handler(uint8_t type, uint8_t *msg, uint8_t length) {
-  if (type == ECHO_RESP_MESSAGE) {
-    if (strcmp((char *)msg, "low")) {
-      led_off();
-    } else {
-      led_on();
-    }
-  }
-}
+void message_handler(uint8_t type, uint8_t *msg, uint8_t length) {}
 
 void init() {
   setup_clocks();
   uart_setup(SystemCoreClock, BaudRate);
   setup_led();
+  setup_button();
 
   led_on();
   while (!simpit_init()) {
@@ -61,13 +67,8 @@ void init() {
 }
 
 void loop() {
-  if (state) {
-    simpit_send(ECHO_REQ_MESSAGE, "low", 4);
-  } else {
-    simpit_send(ECHO_REQ_MESSAGE, "high", 5);
-  }
-
-  state = !state;
+  if (button_pressed())
+    activate_action(STAGE_ACTION);
   simpit_update();
 }
 
@@ -76,7 +77,6 @@ int main() {
 
   while (1) {
     loop();
-    delay_ms(1000);
   }
 
   return 0;

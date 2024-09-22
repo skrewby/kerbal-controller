@@ -184,3 +184,7 @@ void simpit_update() {
     }
   }
 }
+
+void activate_action(uint8_t action) {
+  simpit_send(AGACTIVATE_MESSAGE, (char *)&action, 1);
+}
