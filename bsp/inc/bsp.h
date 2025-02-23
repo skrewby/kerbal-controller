@@ -22,8 +22,8 @@ void button_init();
 uint8_t button_pressed();
 
 /*
-* SysTick functions
-*/
+ * SysTick functions
+ */
 void systick_init();
 // Intended to be run inside Systick_Handler
 void systick_update();
@@ -44,8 +44,8 @@ int serial_available();
 void serial_clear();
 
 /*
-* USART2 functions
-*/
+ * USART2 functions
+ */
 void usart2_setup(uint32_t baud_rate);
 void usart2_write(uint16_t ch);
 void usart2_write_buffer(uint8_t ch);
