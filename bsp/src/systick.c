@@ -8,8 +8,8 @@
 volatile uint32_t systick_tick = 0;
 
 void systick_init() {
-  SystemCoreClockUpdate();
-  SysTick_Config(SystemCoreClock / 1000);
+    SystemCoreClockUpdate();
+    SysTick_Config(SystemCoreClock / 1000);
 }
 
 uint32_t get_tick() { return systick_tick; }
@@ -17,7 +17,7 @@ uint32_t get_tick() { return systick_tick; }
 void systick_update() { systick_tick++; }
 
 void delay(int ms) {
-  uint32_t starttick = systick_tick;
-  while ((systick_tick - starttick) - ms) {
-  }
+    uint32_t starttick = systick_tick;
+    while ((systick_tick - starttick) - ms) {
+    }
 }

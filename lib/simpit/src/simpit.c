@@ -12,176 +12,180 @@ static int received_index = 0;
 // https://github.com/Simpit-team/KerbalSimpitRevamped-Arduino/blob/main/src/KerbalSimpit.cpp
 // and modified slightly
 int cobsEncode(const void *data, int length, uint8_t *buffer) {
-  uint8_t *encode = buffer;  // Encoded byte pointer
-  uint8_t *codep = encode++; // Output code pointer
-  uint8_t code = 1;          // Code value
+    uint8_t *encode = buffer;  // Encoded byte pointer
+    uint8_t *codep = encode++; // Output code pointer
+    uint8_t code = 1;          // Code value
 
-  for (const uint8_t *byte = (const uint8_t *)data; length--; ++byte) {
-    if (*byte) // Byte not zero, write it
-      *encode++ = *byte, ++code;
+    for (const uint8_t *byte = (const uint8_t *)data; length--; ++byte) {
+        if (*byte) { // Byte not zero, write it
+            *encode++ = *byte, ++code;
+        }
 
-    if (!*byte || code == 0xff) // Input is zero or block completed, restart
-    {
-      *codep = code, code = 1, codep = encode;
-      if (!*byte || length)
-        ++encode;
+        if (!*byte || code == 0xff) // Input is zero or block completed, restart
+        {
+            *codep = code, code = 1, codep = encode;
+            if (!*byte || length) {
+                ++encode;
+            }
+        }
     }
-  }
-  *codep = code; // Write final code value
+    *codep = code; // Write final code value
 
-  return (int)(encode - buffer);
+    return (int)(encode - buffer);
 }
 
 int cobsDecode(const uint8_t *buffer, int length, void *data) {
-  const uint8_t *byte = buffer;      // Encoded input byte pointer
-  uint8_t *decode = (uint8_t *)data; // Decoded output byte pointer
+    const uint8_t *byte = buffer;      // Encoded input byte pointer
+    uint8_t *decode = (uint8_t *)data; // Decoded output byte pointer
 
-  for (uint8_t code = 0xff, block = 0; byte < buffer + length; --block) {
-    if (block) // Decode block byte
-      *decode++ = *byte++;
-    else {
-      if (code != 0xff) // Encoded zero, write it
-        *decode++ = 0;
-      block = code = *byte++; // Next block length
-      if (!code)              // Delimiter code found
-        break;
+    for (uint8_t code = 0xff, block = 0; byte < buffer + length; --block) {
+        if (block) { // Decode block byte
+            *decode++ = *byte++;
+        } else {
+            if (code != 0xff) { // Encoded zero, write it
+                *decode++ = 0;
+            }
+            block = code = *byte++; // Next block length
+            if (!code) {            // Delimiter code found
+                break;
+            }
+        }
     }
-  }
 
-  return (int)(decode - (uint8_t *)data);
+    return (int)(decode - (uint8_t *)data);
 }
 
 void simpit_send(uint8_t type, char *msg, int len) {
-  uint8_t buffer[MAX_PAYLOAD_SIZE + 2];
+    uint8_t buffer[MAX_PAYLOAD_SIZE + 2];
 
-  buffer[0] = type;
-  uint8_t checksum = type;
+    buffer[0] = type;
+    uint8_t checksum = type;
 
-  for (uint8_t i = 0; i < len; i++) {
-    buffer[i + 1] = msg[i];
-    checksum ^= msg[i];
-  }
-  buffer[len + 1] = checksum;
+    for (uint8_t i = 0; i < len; i++) {
+        buffer[i + 1] = msg[i];
+        checksum ^= msg[i];
+    }
+    buffer[len + 1] = checksum;
 
-  uint8_t payload[MAX_PAYLOAD_SIZE + 4];
-  uint8_t encoded_size = cobsEncode(buffer, len + 2, payload);
-  for (uint8_t i = 0; i < encoded_size; i++) {
-    serial_write(payload[i]);
-  }
-  serial_write(0x00);
+    uint8_t payload[MAX_PAYLOAD_SIZE + 4];
+    uint8_t encoded_size = cobsEncode(buffer, len + 2, payload);
+    for (uint8_t i = 0; i < encoded_size; i++) {
+        serial_write(payload[i]);
+    }
+    serial_write(0x00);
 }
 
 // We expect the buffer to be of size MAX_MESSAGE_SIZE + HEADER_SIZE
 uint8_t simpit_read(uint8_t *buf, int len) {
-  uint8_t count = 0;
+    uint8_t count = 0;
 
-  while (serial_available()) {
-    if (count >= len)
-      return count;
+    while (serial_available()) {
+        if (count >= len) {
+            return count;
+        }
 
-    buf[count] = serial_read();
-    count++;
-  }
+        buf[count] = serial_read();
+        count++;
+    }
 
-  return count;
+    return count;
 }
 
 int simpit_init() {
-  serial_clear();
+    serial_clear();
 
-  uint8_t payload[MAX_PAYLOAD_SIZE + 4];
-  payload[0] = 0x00;
-  uint32_t i = 0;
-  for (i = 0; i < sizeof(KERBALSIMPIT_VERSION); i++) {
-    payload[i + 1] = KERBALSIMPIT_VERSION[i];
-  }
-  i += 1;
-  simpit_send(0x00, (char *)payload, i); // Send SYN
-
-  // Wait for response
-  int count = 0;
-  while (!serial_available()) {
-    count += 1;
-    delay(100);
-    if (count > 100)
-      return 0;
-  }
-
-  int index = 0;
-  uint8_t buffer[MAX_PAYLOAD_SIZE + 4];
-  uint8_t decoded_buffer[MAX_PAYLOAD_SIZE + 4];
-  GPIOB->ODR = 0 << 13;
-  while (serial_available()) {
-    if (index >= MAX_PAYLOAD_SIZE + 4)
-      return 0;
-
-    buffer[index] = serial_read();
-    if (buffer[index] == 0x00) {
-      cobsDecode(buffer, index + 1, decoded_buffer);
-      GPIOB->ODR = 0 << 13;
-
-      // Test if the message received is a SYNACK
-      if (decoded_buffer[0] == SYNC_MESSAGE && decoded_buffer[1] == 0x01) {
-        payload[0] = 0x02;
-        simpit_send(0x00, (char *)payload, i); // Send ACK
-        return 1;
-      } else {
-        return 0;
-      }
-    } else {
-      GPIOB->ODR = 1 << 13;
+    uint8_t payload[MAX_PAYLOAD_SIZE + 4];
+    payload[0] = 0x00;
+    uint32_t i = 0;
+    for (i = 0; i < sizeof(KERBALSIMPIT_VERSION); i++) {
+        payload[i + 1] = KERBALSIMPIT_VERSION[i];
     }
-    index++;
-  }
+    i += 1;
+    simpit_send(0x00, (char *)payload, i); // Send SYN
 
-  return 0;
+    // Wait for response
+    int count = 0;
+    while (!serial_available()) {
+        count += 1;
+        delay(100);
+        if (count > 100) {
+            return 0;
+        }
+    }
+
+    int index = 0;
+    uint8_t buffer[MAX_PAYLOAD_SIZE + 4];
+    uint8_t decoded_buffer[MAX_PAYLOAD_SIZE + 4];
+    GPIOB->ODR = 0 << 13;
+    while (serial_available()) {
+        if (index >= MAX_PAYLOAD_SIZE + 4) {
+            return 0;
+        }
+
+        buffer[index] = serial_read();
+        if (buffer[index] == 0x00) {
+            cobsDecode(buffer, index + 1, decoded_buffer);
+            GPIOB->ODR = 0 << 13;
+
+            // Test if the message received is a SYNACK
+            if (decoded_buffer[0] == SYNC_MESSAGE && decoded_buffer[1] == 0x01) {
+                payload[0] = 0x02;
+                simpit_send(0x00, (char *)payload, i); // Send ACK
+                return 1;
+            } else {
+                return 0;
+            }
+        } else {
+            GPIOB->ODR = 1 << 13;
+        }
+        index++;
+    }
+
+    return 0;
 }
 
 void simpit_print(char *str, uint8_t options) {
-  int max_length = sizeof(str);
-  uint8_t payload[32];
-  payload[0] = options;
+    int max_length = sizeof(str);
+    uint8_t payload[32];
+    payload[0] = options;
 
-  for (uint8_t i = 0; i < 31; i++) {
-    if (str[i] == '\0') {
-      payload[i + 1] = '\0';
-      break;
+    for (uint8_t i = 0; i < 31; i++) {
+        if (str[i] == '\0') {
+            payload[i + 1] = '\0';
+            break;
+        }
+
+        payload[i + 1] = str[i];
     }
 
-    payload[i + 1] = str[i];
-  }
-
-  simpit_send(CUSTOM_LOG, (char *)payload, 32);
+    simpit_send(CUSTOM_LOG, (char *)payload, 32);
 }
 
 void simpit_update() {
-  uint8_t buffer[MAX_PAYLOAD_SIZE + 4];
-  uint8_t decoded_buffer[MAX_PAYLOAD_SIZE + 4];
+    uint8_t buffer[MAX_PAYLOAD_SIZE + 4];
+    uint8_t decoded_buffer[MAX_PAYLOAD_SIZE + 4];
 
-  while (serial_available()) {
-    buffer[received_index] = serial_read();
-    received_index++;
+    while (serial_available()) {
+        buffer[received_index] = serial_read();
+        received_index++;
 
-    if (!buffer[received_index - 1]) {
-      uint8_t decoded_size = cobsDecode(buffer, received_index, decoded_buffer);
+        if (!buffer[received_index - 1]) {
+            uint8_t decoded_size = cobsDecode(buffer, received_index, decoded_buffer);
 
-      // Account for the overhead of 1 byte of COBS
-      if (decoded_size == received_index - 1) {
-        uint8_t checksum = 0;
-        for (uint8_t i = 0; i < decoded_size - 2; i++) {
-          checksum ^= decoded_buffer[i];
+            // Account for the overhead of 1 byte of COBS
+            if (decoded_size == received_index - 1) {
+                uint8_t checksum = 0;
+                for (uint8_t i = 0; i < decoded_size - 2; i++) {
+                    checksum ^= decoded_buffer[i];
+                }
+
+                if (checksum == decoded_buffer[decoded_size - 2]) {
+                    message_handler(decoded_buffer[0], decoded_buffer + 1, decoded_size - 3);
+                }
+            }
+            received_index = 0;
         }
-
-        if (checksum == decoded_buffer[decoded_size - 2]) {
-          message_handler(decoded_buffer[0], decoded_buffer + 1,
-                          decoded_size - 3);
-        }
-      }
-      received_index = 0;
     }
-  }
 }
 
-void simpit_activate_action(uint8_t action) {
-  simpit_send(AGACTIVATE_MESSAGE, (char *)&action, 1);
-}
+void simpit_activate_action(uint8_t action) { simpit_send(AGACTIVATE_MESSAGE, (char *)&action, 1); }
