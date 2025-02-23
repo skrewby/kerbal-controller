@@ -41,6 +41,7 @@ include_directories(
         ${CMAKE_SOURCE_DIR}/cmsis/core
         ${CMAKE_SOURCE_DIR}/cmsis/device/inc
         ${CMAKE_SOURCE_DIR}/utils/inc
+        ${CMAKE_SOURCE_DIR}/lib/simpit/inc
         )
 
 add_definitions(-DSTM32L433xx)
@@ -50,6 +51,7 @@ file(GLOB_RECURSE SOURCES
         "bsp/src/*.*"
         "cmsis/device/src/*.*"
         "utils/src/*.*"
+        "lib/simpit/src/*.*"
         )
 
 set(LINKER_SCRIPT ${CMAKE_SOURCE_DIR}/STM32L433RCTxP_FLASH.ld)

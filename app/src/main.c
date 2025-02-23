@@ -1,5 +1,7 @@
 #include "bsp.h"
 #include "cmsis_gcc.h"
+#include "simpit.h"
+#include "simpit_message_types.h"
 #include <stdint.h>
 
 void init() {
@@ -15,16 +17,16 @@ int main() {
   init();
   __enable_irq();
 
+  led_on();
+  while (!simpit_init()) {
+    delay(100);
+  }
+  led_off();
+  simpit_print("Screwby Controller Connected", PRINT_TO_SCREEN);
+
   while (1) {
-    if (serial_available()) {
-      uint8_t ch = serial_read();
-      if (ch == '1') {
-        led_on();
-        serial_write('Y');
-      } else {
-        led_off();
-        serial_write('N');
-      }
+    if (button_pressed()) {
+      simpit_activate_action(STAGE_ACTION);
     }
   }
 }
