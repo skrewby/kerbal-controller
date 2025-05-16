@@ -21,7 +21,6 @@
 
 /* Includes ------------------------------------------------------------------*/
 #include "stm32l4xx_it.h"
-#include "app.h"
 #include "bsp.h"
 #include <stdint.h>
 
