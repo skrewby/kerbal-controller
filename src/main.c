@@ -1,21 +1,11 @@
 #include "bsp.h"
-#include "cmsis_gcc.h"
 #include "simpit.h"
 #include "simpit_message_types.h"
 #include <stdint.h>
 
-void init() {
-    stm32_init();
-    led_init();
-    button_init();
-    systick_init();
-    serial_setup(115200);
-}
-
 int main() {
-    __disable_irq();
-    init();
-    __enable_irq();
+    stm32_init();
+    serial_init(115200);
 
     led_on();
     while (!simpit_init()) {

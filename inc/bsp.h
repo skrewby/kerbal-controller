@@ -3,6 +3,11 @@
 
 #include <stdint.h>
 
+/*
+ * Calls all of the init functions required to use the STM32
+ * This means that usually you should not need to call functions like
+ * led_init() and button_init() separately
+ */
 void stm32_init();
 
 /*
@@ -36,7 +41,7 @@ uint32_t get_tick();
  * This is the serial connection to the PC that will communicate
  * with Kerbal Simpit
  */
-void serial_setup(uint32_t baud_rate);
+void serial_init(uint32_t baud_rate);
 void serial_write(uint16_t ch);
 uint8_t serial_read();
 int serial_available();
