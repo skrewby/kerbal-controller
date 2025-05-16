@@ -6,6 +6,7 @@ helpFunction() {
   echo -e "\tcommand: Tells the script what to do. Options:"
   echo -e "\t\tflash: Builds and flashes the board"
   echo -e "\t\tbuild: Builds the project"
+  echo -e "\t\tserial: Uses tio to connect to the device"
   echo -e "\t\thelp:  Shows this prompt"
 }
 
@@ -22,4 +23,6 @@ elif [[ $1 == "build" ]]; then
     (cmake -S . -B bin)
     (cd bin; make)
     (cp bin/compile_commands.json .)
+elif [[ $1 == "serial" ]]; then
+    (tio -b 115200 /dev/ttyACM0)
 fi
