@@ -1,4 +1,4 @@
-#include "bsp.h"
+#include "hal.h"
 
 void serial_write(uint16_t ch) { usart2_write(ch); }
 

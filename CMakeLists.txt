@@ -36,7 +36,7 @@ else ()
 endif ()
 
 include_directories(
-    ${CMAKE_SOURCE_DIR}/inc
+    ${CMAKE_SOURCE_DIR}/include
     ${CMAKE_SOURCE_DIR}/cmsis/core
     ${CMAKE_SOURCE_DIR}/cmsis/device/inc
 )
@@ -47,7 +47,7 @@ file(GLOB_RECURSE SOURCES
     "src/*.*"
     "src/simpit/*.*"
     "src/utils/*.*"
-    "bsp/*.*"
+    "src/hal/*.*"
     "cmsis/device/src/*.*"
 )
 

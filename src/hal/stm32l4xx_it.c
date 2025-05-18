@@ -21,7 +21,7 @@
 
 /* Includes ------------------------------------------------------------------*/
 #include "stm32l4xx_it.h"
-#include "bsp.h"
+#include "hal.h"
 #include <stdint.h>
 
 /** @addtogroup STM32L4xx_HAL_Examples
